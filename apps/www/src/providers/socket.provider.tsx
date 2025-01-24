@@ -1,3 +1,4 @@
+import { GAME_READY } from "@repo/types/event";
 import React, {
   createContext,
   PropsWithChildren,
@@ -10,8 +11,17 @@ const SocketContext = createContext<Socket | undefined>(undefined);
 export default function SocketProvider({ children }: PropsWithChildren) {
   const [socket, setSocket] = useState<Socket>();
   useEffect(() => {
+    if (socket) return;
     const conn = io();
+    conn.on(GAME_READY, () => {
+      console.log("Game is ready");
+    });
+
     setSocket(conn);
+
+    return () => {
+      conn.off(GAME_READY);
+    };
   }, []);
 
   return (

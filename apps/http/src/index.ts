@@ -5,6 +5,7 @@ import { router } from "./api/v1";
 import env from "./env";
 import { fromNodeHeaders, toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth";
+import Player from "./socket/player";
 
 const app = express();
 app.all("/api/v1/auth/*", toNodeHandler(auth));
@@ -19,8 +20,12 @@ io.on("connection", async (socket) => {
   const session = await auth.api.getSession({
     headers: fromNodeHeaders(socket.handshake.headers),
   });
-  console.log(session);
-  console.log("A user connected");
+  if (!session) return socket.disconnect();
+  const player = new Player(session.user.id, socket);
+
+  socket.on("disconnect", () => {
+    player.destory();
+  });
 });
 
 if (process.env.NODE_ENV != "test") {

@@ -2,10 +2,8 @@
   "name": "@repo/types",
   "version": "1.0.0",
   "exports": {
-    ".": {
-      "import": "./src/index.js",
-      "require": "./src/index.js"
-    }
+    "./zod": "./src/zod/index.ts",
+    "./event": "./src/event/index.ts"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
