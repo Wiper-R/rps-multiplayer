@@ -3,6 +3,7 @@ import Player from "./player";
 import { v4 as uuid } from "uuid";
 import logger from "../lib/logger";
 import { MAX_PLAYERS } from "../constants";
+import { GameManager } from "./game-manager";
 
 export default class Game {
   private _id: string = uuid();
@@ -31,12 +32,13 @@ export default class Game {
     logger.info(`Player ${player.id} joined game ${this.id}`);
 
     if (this.players.length == MAX_PLAYERS) {
-      this.broadcast(GAME_READY, {});
+      console.log("Game is ready");
+      this.broadcast(GAME_READY, { game: this.toJson() });
     }
   }
 
   removePlayer(player: Player) {
-    this._players = this._players.filter((p) => p != player);
+    this._players = this._players.filter((p) => p.id != player.id);
     this.broadcast(PLAYER_LEFT, { player: player.toJson() });
     logger.info(`Player ${player.id} left game ${this.id}`);
   }

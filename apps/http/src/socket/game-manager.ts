@@ -5,7 +5,6 @@ import Player from "./player";
 export class GameManager {
   public static instance: GameManager;
   private _games: Game[] = [];
-  private _gameId_to_games: Map<string, Game> = new Map();
   private _players_to_games: Map<string, Game> = new Map();
   static getInstance() {
     if (!GameManager.instance) {
@@ -25,7 +24,6 @@ export class GameManager {
       game.addPlayer(player);
     } else {
       game = this.createGame(player);
-      manager._gameId_to_games.set(game.id, game);
     }
 
     manager._players_to_games.set(player.id, game);
@@ -34,19 +32,19 @@ export class GameManager {
   static createGame(player: Player): Game {
     const manager = this.getInstance();
     const game = new Game();
+    logger.info(`Game ${game.id} created`);
     game.addPlayer(player);
     manager._games.push(game);
-    logger.info(`Game ${game.id} created`);
     return game;
   }
 
   static leaveGame(player: Player) {
     const manager = this.getInstance();
-    const game = manager._games.find((game) => game.players.includes(player));
+    const game = manager._players_to_games.get(player.id);
     if (!game) return;
     game.removePlayer(player);
     if (game.players.length == 0) {
-      manager._games = manager._games.filter((g) => g != game);
+      manager._games = manager._games.filter((g) => g.id != game.id);
       logger.info(`Game ${game.id} removed`);
     }
     manager._players_to_games.delete(player.id);
