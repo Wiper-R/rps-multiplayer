@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "exports": {
     "./zod": "./src/zod/index.ts",
-    "./event": "./src/event/index.ts"
+    "./game": "./src/game/index.ts"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "zod": "^3.24.1"
+    "zod": "^3.24.1",
+    "@repo/constants": "workspace:*"
   }
 }

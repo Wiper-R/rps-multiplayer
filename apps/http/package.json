@@ -13,6 +13,7 @@
   "dependencies": {
     "@prisma/client": "6.2.1",
     "@repo/types": "workspace:*",
+    "@repo/constants": "workspace:*",
     "@types/express": "^5.0.0",
     "better-auth": "^1.1.14",
     "cors": "^2.8.5",
