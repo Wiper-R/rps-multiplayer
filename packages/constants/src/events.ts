@@ -6,3 +6,5 @@ export const GAME_RESULT = "game-result";
 export const MOVE = "move";
 export const USE_MOVE = "use-move";
 export const JOIN_GAME = "join-game";
+export const LEAVE_GAME = "leave-game";
+export const RESTART_GAME = "restart-game";

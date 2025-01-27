@@ -1,16 +1,13 @@
 import Game from "@/components/Game";
 import LoginModal from "@/components/LoginModal";
 import { authClient } from "@/lib/auth-client";
+import { createPortal } from "react-dom";
 
 export default function Main() {
   const { isPending, data } = authClient.useSession();
 
   if (isPending || !data)
-    return (
-      <div className="flex items-center justify-center flex-grow bg-black/40 backdrop-blur-2xl absolute inset-0">
-        {isPending ? <p>Loading...</p> : <LoginModal />}
-      </div>
-    );
+    return createPortal(<LoginModal />, document.getElementById("portal")!);
 
   return <Game />;
 }

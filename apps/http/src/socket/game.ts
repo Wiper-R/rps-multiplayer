@@ -6,7 +6,7 @@ import {
   USE_MOVE,
 } from "@repo/constants/events";
 import { MAX_PLAYERS } from "@repo/constants/game";
-import { type PlayerMove } from "@repo/types/game";
+import { GameDef } from "@repo/types/game";
 import Player from "./player";
 import { v4 as uuid } from "uuid";
 import logger from "../lib/logger";
@@ -35,7 +35,7 @@ export default class Game {
   }
 
   registerPlayerEvents(player: Player) {
-    player.socket.on(USE_MOVE, (move: PlayerMove) => {
+    player.socket.on(USE_MOVE, (move: GameDef.PlayerMove) => {
       this.useMove(player, move);
     });
   }
@@ -44,35 +44,36 @@ export default class Game {
     // player.socket.off(USE_MOVE);
   }
 
-  addPlayer(player: Player, created: boolean = false) {
+  addPlayer(player: Player) {
     if (this.players.length >= MAX_PLAYERS) {
       throw new Error("Game is full");
     }
+    player.move = null;
     this._players.push(player);
     this.registerPlayerEvents(player);
-    this.broadcast(PLAYER_JOINED, { player: player.toJson(), created });
+    this.broadcast(PLAYER_JOINED, player.toJson() as GameDef.PlayerJoined);
     logger.info(`Player ${player.id} joined game ${this.id}`);
 
     if (this.players.length == MAX_PLAYERS) {
       this._ready = true;
-      this.broadcast(GAME_READY, { game: this.toJson() });
+      this.broadcast(GAME_READY, this.toJson() as GameDef.GameReady);
       logger.info(`Game ${this.id} is ready`);
     }
   }
 
   removePlayer(player: Player) {
     this._players = this._players.filter((p) => p.id != player.id);
-    this.broadcast(PLAYER_LEFT, { player: player.toJson() });
+    this.broadcast(PLAYER_LEFT, player.toJson() as GameDef.PlayerLeft);
     logger.info(`Player ${player.id} left game ${this.id}`);
   }
 
-  useMove(player: Player, move: PlayerMove) {
+  useMove(player: Player, move: GameDef.PlayerMove) {
     if (this.players.length < MAX_PLAYERS || !this.ready) {
-      throw new Error("Game is not ready");
+      return;
     }
     const otherPlayer = this.players.find((p) => p.id != player.id);
     if (!otherPlayer) {
-      throw new Error("Other player not found");
+      return;
     }
 
     player.move = move;
@@ -84,12 +85,13 @@ export default class Game {
           [player.id]: player.move,
           [otherPlayer.id]: otherPlayer.move,
         },
-        winner: this.calculateWinner(player, otherPlayer),
-      });
+        winnerId: this.calculateWinner(player, otherPlayer),
+      } as GameDef.GameResult);
+      logger.info(`Game ${this.id} result sent`);
     }
   }
 
-  toJson() {
+  toJson(): GameDef.Game {
     return {
       id: this.id,
       players: this.players.map((player) => player.toJson()),

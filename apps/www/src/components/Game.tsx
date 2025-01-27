@@ -1,28 +1,31 @@
 import Triangle from "@/components/Triangle/index";
 import { useGame } from "@/providers/game";
 import Topbar from "./topbar";
+import { createPortal } from "react-dom";
+import { ResultScreen } from "./result-screen";
+import Button from "./button";
 
 export default function Game() {
-  const { gameId, joinGame } = useGame();
+  const { gameId, joinGame, result } = useGame();
   return (
-    <div>
+    <div className="flex flex-col flex-grow">
       <Topbar />
-      <Triangle />
-      {!gameId && (
-        <div className="text-white absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center flex-col">
-          <div className="flex items-center flex-col gap-4">
+      {result ? <ResultScreen result={result} /> : <Triangle />}
+      {!gameId &&
+        createPortal(
+          <div className="flex items-center flex-col gap-4 text-white">
             <div className="text-2xl font-semibold">
               You are not currenly in game
             </div>
-            <button
+            <Button
               className="cursor-pointer  border-white py-2 px-6 rounded-lg border-2"
               onClick={() => joinGame()}
             >
               Join Now
-            </button>
-          </div>
-        </div>
-      )}
+            </Button>
+          </div>,
+          document.getElementById("portal")!,
+        )}
     </div>
   );
 }

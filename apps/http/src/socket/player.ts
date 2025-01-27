@@ -1,16 +1,30 @@
 import { Record } from "@prisma/client/runtime/library";
 import { Socket } from "socket.io";
 import { GameManager } from "./game-manager";
-import { PlayerMove } from "@repo/types/game";
-import { JOIN_GAME } from "@repo/constants/events";
+import { GameDef } from "@repo/types/game";
+import { JOIN_GAME, LEAVE_GAME, RESTART_GAME } from "@repo/constants/events";
 
 export default class Player {
   private _id: string;
+  private _name: string;
+  private _image: string | null;
   private _socket: Socket;
-  private _move: PlayerMove | null = null;
-  constructor(id: string, socket: Socket) {
+  private _move: GameDef.PlayerMove | null = null;
+  constructor({
+    id,
+    name,
+    socket,
+    image,
+  }: {
+    id: string;
+    name: string;
+    socket: Socket;
+    image: string | null;
+  }) {
     this._id = id;
     this._socket = socket;
+    this._name = name;
+    this._image = image;
     this.registerEvents();
   }
 
@@ -18,23 +32,31 @@ export default class Player {
     this.socket.on(JOIN_GAME, () => {
       GameManager.joinGame(this);
     });
+    this.socket.on(LEAVE_GAME, () => {
+      GameManager.leaveGame(this);
+    });
+    this.socket.on(RESTART_GAME, () => {
+      GameManager.restartGame(this);
+    });
   }
 
   get id(): string {
     return this._id;
   }
 
-  get move(): PlayerMove | null {
+  get move(): GameDef.PlayerMove | null {
     return this._move;
   }
 
-  set move(move: PlayerMove | null) {
+  set move(move: GameDef.PlayerMove | null) {
     this._move = move;
   }
 
-  toJson() {
+  toJson(): GameDef.Player {
     return {
       id: this.id,
+      name: this._name,
+      image: this._image,
     };
   }
 

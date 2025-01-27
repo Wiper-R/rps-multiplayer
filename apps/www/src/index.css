@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+
 html,
 body {
   height: 100%;
@@ -12,4 +13,47 @@ body {
   background-size: cover;
   background-attachment: fixed;
   background-position: top center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+
+#portal {
+  position: absolute;
+  display: flex;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.1);
+}
+
+#portal:not(:has(div)) {
+  display: none;
+}
+
+
+.result-animation {
+  animation: result-animation 1s forwards ease-in;
+}
+
+
+@keyframes result-animation {
+  0% {
+    scale: 0.4;
+    opacity: 0;
+  }
+
+  100% {
+    scale: 1;
+    opacity: 1;
+  }
 }

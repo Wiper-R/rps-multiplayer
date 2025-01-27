@@ -1,6 +1,8 @@
+import { GAME_CREATED } from "@repo/constants/events";
 import logger from "../lib/logger";
 import Game from "./game";
 import Player from "./player";
+import { GameDef } from "@repo/types/game";
 
 export class GameManager {
   public static instance: GameManager;
@@ -15,7 +17,9 @@ export class GameManager {
 
   static joinGame(player: Player) {
     const manager = this.getInstance();
-    let game = manager._games.find((game) => game.players.length == 1);
+    let game = manager._games.find(
+      (game) => game.players.length == 1 && !game.ready,
+    );
     if (manager._players_to_games.has(player.id)) {
       logger.info(`Player ${player.id} already in game`);
       return;
@@ -33,6 +37,7 @@ export class GameManager {
     const manager = this.getInstance();
     const game = new Game();
     logger.info(`Game ${game.id} created`);
+    player.sendMessage(GAME_CREATED, { id: game.id } as GameDef.GameCreated);
     game.addPlayer(player);
     manager._games.push(game);
     return game;
@@ -48,5 +53,10 @@ export class GameManager {
       logger.info(`Game ${game.id} removed`);
     }
     manager._players_to_games.delete(player.id);
+  }
+
+  static restartGame(player: Player) {
+    this.leaveGame(player);
+    this.joinGame(player);
   }
 }

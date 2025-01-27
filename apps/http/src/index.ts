@@ -21,7 +21,13 @@ io.on("connection", async (socket) => {
     headers: fromNodeHeaders(socket.handshake.headers),
   });
   if (!session) return socket.disconnect();
-  const player = new Player(session.user.id, socket);
+  const user = session.user;
+  const player = new Player({
+    id: user.id,
+    image: user.image || null,
+    name: user.name,
+    socket,
+  });
 
   socket.on("disconnect", () => {
     player.destory();

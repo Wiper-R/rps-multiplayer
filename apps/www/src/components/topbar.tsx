@@ -1,5 +1,5 @@
 import { authClient } from "@/lib/auth-client";
-// import { useGame } from "@/providers/game";
+import { useGame } from "@/providers/game";
 
 function Avatar({ src, name }: { src?: string | null; name?: string }) {
   return (
@@ -15,7 +15,7 @@ function Avatar({ src, name }: { src?: string | null; name?: string }) {
 
 export default function Topbar() {
   const { data } = authClient.useSession();
-  // const { gameId, state } = useGame();
+  const { otherPlayer } = useGame();
   return (
     <header className="p-4 flex justify-between">
       <div className="flex gap-2 text-gray-200 items-center">
@@ -26,10 +26,16 @@ export default function Topbar() {
       </div>
       <span className="text-4xl font-bold text-white">VS</span>
       <div className="flex gap-2 text-gray-200 items-center flex-row-reverse text-right">
-        <Avatar src={data?.user.image} />
-        <div className="flex flex-col justify-center text-xl">
-          <span>{data?.user.name}</span>
-        </div>
+        {otherPlayer ? (
+          <>
+            <Avatar src={otherPlayer.image} />
+            <div className="flex flex-col justify-center text-xl">
+              <span>{otherPlayer.name}</span>
+            </div>
+          </>
+        ) : (
+          <span>Waiting for other player</span>
+        )}
       </div>
     </header>
   );
