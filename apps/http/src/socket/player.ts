@@ -1,78 +1,56 @@
-import { Record } from "@prisma/client/runtime/library";
 import { Socket } from "socket.io";
-import { GameManager } from "./game-manager";
-import { GameDef } from "@repo/types/game";
-import { JOIN_GAME, LEAVE_GAME, RESTART_GAME } from "@repo/constants/events";
+import { SocketClass } from "./socket-class";
+import { CREATE_LOBBY, JOIN_LOBBY } from "@repo/constants/events";
+import { LobbyManager } from "./lobby-manager";
 
-export default class Player {
-  private _id: string;
-  private _name: string;
-  private _image: string | null;
-  private _socket: Socket;
-  private _move: GameDef.PlayerMove | null = null;
+export class Player implements SocketClass {
+  readonly id: string;
+  readonly name: string;
+  readonly socket: Socket;
+  readonly image: string | null;
+
   constructor({
     id,
     name,
-    socket,
     image,
+    socket,
   }: {
     id: string;
     name: string;
-    socket: Socket;
     image: string | null;
+    socket: Socket;
   }) {
-    this._id = id;
-    this._socket = socket;
-    this._name = name;
-    this._image = image;
-    this.registerEvents();
+    this.id = id;
+    this.name = name;
+    this.socket = socket;
+    this.image = image;
+
+    this.registerListeners();
   }
 
-  registerEvents(): void {
-    this.socket.on(JOIN_GAME, () => {
-      GameManager.joinGame(this);
+  registerListeners(): void {
+    this.socket.on(JOIN_LOBBY, (lobbyId?: string) => {
+      console.log(lobbyId);
+      LobbyManager.join(this, lobbyId);
     });
-    this.socket.on(LEAVE_GAME, () => {
-      GameManager.leaveGame(this);
-    });
-    this.socket.on(RESTART_GAME, () => {
-      GameManager.restartGame(this);
+
+    this.socket.on(CREATE_LOBBY, (isPrivate = false) => {
+      LobbyManager.create(this, isPrivate);
     });
   }
 
-  get id(): string {
-    return this._id;
-  }
-
-  get move(): GameDef.PlayerMove | null {
-    return this._move;
-  }
-
-  set move(move: GameDef.PlayerMove | null) {
-    this._move = move;
-  }
-
-  toJson(): GameDef.Player {
-    return {
-      id: this.id,
-      name: this._name,
-      image: this._image,
-    };
-  }
-
-  get socket(): Socket {
-    return this._socket;
-  }
-
-  sendMessage(ev: string, message: Record<string, unknown>): void {
-    this.socket.emit(ev, message);
-  }
-
-  disconnect(): void {
-    this.socket.disconnect();
+  send(event: string, data: Record<string, any>): void {
+    this.socket.emit(event, data);
   }
 
   destory(): void {
-    GameManager.leaveGame(this);
+    LobbyManager.leave(this);
+  }
+
+  toJson(): Record<string, any> {
+    return {
+      id: this.id,
+      name: this.name,
+    };
   }
 }

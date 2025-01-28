@@ -5,7 +5,7 @@ import { router } from "./api/v1";
 import env from "./env";
 import { fromNodeHeaders, toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth";
-import Player from "./socket/player";
+import { Player } from "./socket/player";
 
 const app = express();
 app.all("/api/v1/auth/*", toNodeHandler(auth));

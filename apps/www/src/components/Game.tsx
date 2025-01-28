@@ -1,36 +1,50 @@
-import Triangle from "@/components/Triangle/index";
 import { useGame } from "@/providers/game";
-import Topbar from "./topbar";
-import { createPortal } from "react-dom";
-import { ResultScreen } from "./result-screen";
 import Button from "./button";
+import { useState } from "react";
+import { createPortal } from "react-dom";
+import Topbar from "./topbar";
+import Triangle from "./Triangle";
 
 export default function Game() {
-  const { gameId, joinGame, result, leaveGame } = useGame();
+  const { lobby, game } = useGame();
+  if (!lobby) return <LobbyManager />;
   return (
-    <div className="flex flex-col flex-grow">
+    <div className="relative flex-grow">
       <Topbar />
-      {result ? <ResultScreen result={result} /> : <Triangle />}
-      {!gameId
-        ? createPortal(
-            <div className="flex items-center flex-col gap-4 text-white">
-              <div className="text-2xl font-semibold">
-                You are not currenly in game
-              </div>
-              <Button
-                className="cursor-pointer  border-white py-2 px-6 rounded-lg border-2"
-                onClick={() => joinGame()}
-              >
-                Join Now
-              </Button>
-            </div>,
-            document.getElementById("portal")!,
-          )
-        : !result && (
-            <div className="p-10 flex flex-row-reverse">
-              <Button onClick={leaveGame}>Leave Game</Button>
-            </div>
-          )}
+      <Triangle />
     </div>
+  );
+}
+
+function LobbyManager() {
+  const { createLobby, joinLobby } = useGame();
+  const [lobbyId, setLobbyId] = useState("");
+  return createPortal(
+    <div className="flex gap-4 flex-col flex-wrap items-center">
+      <div className="space-y-2 border border-white/10 p-4 rounded-xl h-fit g1">
+        <h2 className="text-xl font-semibold">Create a new lobby</h2>
+        <p>Start a new game lobby to join and play with others</p>
+        <Button onClick={createLobby} className="w-full">
+          Create Lobby
+        </Button>
+      </div>
+      <div className="space-y-2 border border-white/10 p-4 rounded-xl h-fit g1">
+        <h2 className="text-xl font-semibold">Join a Lobby</h2>
+        <p>Enter a lobby ID to join an existing game</p>
+        <input
+          value={lobbyId}
+          onChange={(e) => setLobbyId(e.target.value)}
+          placeholder="Lobby ID"
+          className="w-full p-4 rounded-xl border-2 border-white text-white min-h-[52px] text-xl capitalize"
+        />
+        <Button onClick={() => joinLobby(lobbyId)} className="w-full">
+          Join Lobby
+        </Button>
+        <span className="text-sm text-white">
+          Keep id blank to join a random lobby
+        </span>
+      </div>
+    </div>,
+    document.getElementById("portal")!,
   );
 }

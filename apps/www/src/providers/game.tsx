@@ -1,12 +1,10 @@
 import { authClient } from "@/lib/auth-client";
 import {
-  GAME_CREATED,
-  GAME_READY,
-  GAME_RESULT,
-  JOIN_GAME,
-  LEAVE_GAME,
-  RESTART_GAME,
-  USE_MOVE,
+  CREATE_LOBBY,
+  JOIN_LOBBY,
+  LOBBY_CREATED,
+  LOBBY_JOINED,
+  LOBBY_LEFT,
 } from "@repo/constants/events";
 import { GameDef } from "@repo/types/game";
 import React, {
@@ -14,87 +12,88 @@ import React, {
   PropsWithChildren,
   useEffect,
   useState,
+  useCallback,
+  useMemo,
 } from "react";
 import { io, Socket } from "socket.io-client";
-import useOtherPlayer from "@/hooks/game/useOtherPlayer";
 
 type GameContext = {
-  joinGame: () => void;
-  restart: () => void;
-  runMove: (move: GameDef.PlayerMove) => void;
-  gameId: string | null;
-  otherPlayer?: GameDef.Player;
-  result: GameDef.GameResult | null;
-  leaveGame: () => void;
+  createLobby: () => void;
+  joinLobby: (lobbyId: string) => void;
+  lobby: GameDef.Lobby | null;
 };
 
 const GameContext = createContext<GameContext | undefined>(undefined);
-export default function GameProvider({ children }: PropsWithChildren) {
+
+const useSocket = () => {
   const session = authClient.useSession();
   const [socket, setSocket] = useState<Socket>();
-  const [gameId, setGameId] = useState<string | null>(null);
-  const [result, setResult] = useState<GameDef.GameResult | null>(null);
-  const [isReady, setIsReady] = useState(false);
-  const { otherPlayer, setOtherPlayer } = useOtherPlayer(socket);
+  const [lobby, setLobby] = useState<GameDef.Lobby | null>(null);
+
   useEffect(() => {
-    if (socket || !session.data?.user) return;
+    if (!session.data?.user) return;
+
     const conn = io();
-    conn.on(GAME_READY, (game: GameDef.Game) => {
-      setGameId(game.id);
-      setIsReady(true);
-    });
-
-    conn.on(GAME_CREATED, (game: GameDef.GameCreated) => {
-      setGameId(game.id);
-    });
-
-    conn.on(GAME_RESULT, (result: GameDef.GameResult) => {
-      setResult(result);
-    });
-
     setSocket(conn);
+
+    conn.onAny((event, ...args) => {
+      console.log(event, args);
+    });
+
+    conn.on(LOBBY_CREATED, (lobby: GameDef.LobbyCreated) => {
+      setLobby(lobby);
+    });
+
+    conn.on(LOBBY_JOINED, ({ lobby }: GameDef.LobbyJoined) => {
+      setLobby(lobby);
+    });
+
+    conn.on(LOBBY_LEFT, ({ lobby, player }: GameDef.LobbyLeft) => {
+      if (player.id === session.data?.user.id) {
+        setLobby(null);
+      } else {
+        setLobby({
+          ...lobby,
+          players: lobby.players.filter((p) => p.id !== player.id),
+        });
+      }
+    });
+
     return () => {
       conn.disconnect();
     };
-  }, [session, setGameId, setSocket]);
+  }, [session.data]);
 
-  function joinGame() {
-    socket?.emit(JOIN_GAME);
-  }
-  function runMove(move: GameDef.PlayerMove) {
-    socket?.emit(USE_MOVE, move);
-  }
+  return { socket, lobby };
+};
 
-  function leaveGame() {
-    setGameId(null);
-    setResult(null);
-    setIsReady(false);
-    setOtherPlayer(undefined);
-    socket?.emit(LEAVE_GAME);
-  }
+export default function GameProvider({ children }: PropsWithChildren) {
+  const { socket, lobby } = useSocket();
 
-  function restart() {
-    setResult(null);
-    setGameId(null);
-    setIsReady(false);
-    setOtherPlayer(undefined);
-    socket?.emit(RESTART_GAME);
-  }
+  const createLobby = useCallback(() => {
+    if (!socket) throw new Error("Socket not ready");
+    socket.emit(CREATE_LOBBY);
+  }, [socket]);
+
+  const joinLobby = useCallback(
+    (lobbyId: string) => {
+      if (!socket) throw new Error("Socket not ready");
+      socket.emit(JOIN_LOBBY, lobbyId);
+    },
+    [socket],
+  );
+
+  const contextValue = useMemo(
+    () => ({
+      createLobby,
+      joinLobby,
+      lobby,
+    }),
+    [createLobby, joinLobby, lobby],
+  );
 
   return (
-    <GameContext.Provider
-      value={{
-        joinGame,
-        runMove,
-        gameId,
-        otherPlayer,
-        result,
-        restart,
-        leaveGame,
-      }}
-    >
-      {children}
-    </GameContext.Provider>
+    <GameContext.Provider value={contextValue}>{children}</GameContext.Provider>
   );
 }
 

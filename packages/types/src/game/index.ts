@@ -6,24 +6,21 @@ export declare namespace GameDef {
     | typeof MOVE_PAPER
     | typeof MOVE_SCISSORS;
 
-  export type Game = {
-    id: string;
-    players: Player[];
-  };
-
   export type Player = {
     id: string;
     name: string;
     image: string | null;
   };
 
-  // Events
-  export type GameCreated = { id: string };
-  export type GameReady = Game;
-  export type PlayerJoined = Player;
-  export type PlayerLeft = Player;
-  export type GameResult = {
-    moves: { [k: string]: PlayerMove };
-    winnerId: string | null;
+  export type Lobby = {
+    id: string;
+    players: Player[];
+    ownerId: string;
+    isPrivate: boolean;
+    isGameStarted: boolean;
   };
+
+  export type LobbyCreated = Lobby;
+  export type LobbyJoined = { lobby: Lobby; player: Player };
+  export type LobbyLeft = { lobby: Lobby; player: Player };
 }

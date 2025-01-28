@@ -1,23 +1,16 @@
-import { ComponentProps, PropsWithChildren } from "react";
-import { LucideIcon } from "lucide-react";
+import { ComponentProps } from "react";
+import { cn } from "@/lib/utils";
 
-type ButtonProps = {
-  icon?: LucideIcon;
-} & ComponentProps<"button">;
-export default function Button({
-  className,
-  children,
-  icon,
-  ...props
-}: ButtonProps) {
+type ButtonProps = {} & ComponentProps<"button">;
+
+export default function Button({ className, ...props }: ButtonProps) {
   return (
     <button
-      className="cursor-pointer p-px text-white font-semibold text-lg  rounded-2xl overflow-hidden inline-flex items-center justify-center isolate"
+      className={cn(
+        "p-4 min-h-[52px] border-white border-2 rounded-xl text-white hover:border-gray-400 hover:text-gray-400 cursor-pointer transition-colors",
+        className,
+      )}
       {...props}
-    >
-      <span className="relative h-full w-full py-2 px-6 button-before flex items-center justify-center rounded-2xl button-after  min-h-[60px] bg-transparent border-2 border-gray-100/20">
-        {children}
-      </span>
-    </button>
+    ></button>
   );
 }
