@@ -3,6 +3,7 @@ import logger from "../lib/logger";
 import Game from "./game";
 import Player from "./player";
 import { GameDef } from "@repo/types/game";
+import db from "../lib/db";
 
 export class GameManager {
   public static instance: GameManager;
@@ -15,7 +16,7 @@ export class GameManager {
     return GameManager.instance;
   }
 
-  static joinGame(player: Player) {
+  static async joinGame(player: Player) {
     const manager = this.getInstance();
     let game = manager._games.find(
       (game) => game.players.length == 1 && !game.ready,
@@ -25,17 +26,20 @@ export class GameManager {
       return;
     }
     if (game) {
-      game.addPlayer(player);
+      await game.addPlayer(player);
     } else {
-      game = this.createGame(player);
+      game = await this.createGame(player);
     }
 
     manager._players_to_games.set(player.id, game);
   }
 
-  static createGame(player: Player): Game {
+  static async createGame(player: Player): Promise<Game> {
     const manager = this.getInstance();
-    const game = new Game();
+    const history = await db.gameHistory.create({
+      data: { playerIds: [], moves: {} },
+    });
+    const game = new Game(history.id);
     logger.info(`Game ${game.id} created`);
     player.sendMessage(GAME_CREATED, { id: game.id } as GameDef.GameCreated);
     game.addPlayer(player);

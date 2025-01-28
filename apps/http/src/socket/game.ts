@@ -8,13 +8,17 @@ import {
 import { MAX_PLAYERS } from "@repo/constants/game";
 import { GameDef } from "@repo/types/game";
 import Player from "./player";
-import { v4 as uuid } from "uuid";
 import logger from "../lib/logger";
+import db from "../lib/db";
 
 export default class Game {
-  private _id: string = uuid();
+  private _id: string;
   private _players: Player[] = [];
   private _ready: boolean = false;
+
+  constructor(id: string) {
+    this._id = id;
+  }
 
   get id(): string {
     return this._id;
@@ -44,7 +48,7 @@ export default class Game {
     // player.socket.off(USE_MOVE);
   }
 
-  addPlayer(player: Player) {
+  async addPlayer(player: Player) {
     if (this.players.length >= MAX_PLAYERS) {
       throw new Error("Game is full");
     }
@@ -58,6 +62,12 @@ export default class Game {
       this._ready = true;
       this.broadcast(GAME_READY, this.toJson() as GameDef.GameReady);
       logger.info(`Game ${this.id} is ready`);
+      await db.gameHistory.update({
+        where: {
+          id: this.id,
+        },
+        data: { playerIds: this.players.map((p) => p.id) },
+      });
     }
   }
 
@@ -67,8 +77,8 @@ export default class Game {
     logger.info(`Player ${player.id} left game ${this.id}`);
   }
 
-  useMove(player: Player, move: GameDef.PlayerMove) {
-    if (this.players.length < MAX_PLAYERS || !this.ready) {
+  async useMove(player: Player, move: GameDef.PlayerMove) {
+    if (this.players.length < MAX_PLAYERS || !this.ready || player.move) {
       return;
     }
     const otherPlayer = this.players.find((p) => p.id != player.id);
@@ -78,13 +88,29 @@ export default class Game {
 
     player.move = move;
     logger.info(`Player ${player.id} used move ${move}`);
-
-    if (otherPlayer.move) {
-      this.broadcast(GAME_RESULT, {
-        moves: {
-          [player.id]: player.move,
-          [otherPlayer.id]: otherPlayer.move,
+    if (!otherPlayer.move) {
+      await db.gameHistory.update({
+        where: { id: this.id },
+        data: {
+          moves: {
+            [player.id]: move,
+          },
         },
+      });
+    } else {
+      const moves = {
+        [player.id]: player.move,
+        [otherPlayer.id]: otherPlayer.move,
+      };
+      await db.gameHistory.update({
+        where: { id: this.id },
+        data: {
+          moves,
+          completedAt: new Date(),
+        },
+      });
+      this.broadcast(GAME_RESULT, {
+        moves,
         winnerId: this.calculateWinner(player, otherPlayer),
       } as GameDef.GameResult);
       logger.info(`Game ${this.id} result sent`);

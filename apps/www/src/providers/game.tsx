@@ -25,6 +25,7 @@ type GameContext = {
   gameId: string | null;
   otherPlayer?: GameDef.Player;
   result: GameDef.GameResult | null;
+  leaveGame: () => void;
 };
 
 const GameContext = createContext<GameContext | undefined>(undefined);
@@ -64,6 +65,14 @@ export default function GameProvider({ children }: PropsWithChildren) {
     socket?.emit(USE_MOVE, move);
   }
 
+  function leaveGame() {
+    setGameId(null);
+    setResult(null);
+    setIsReady(false);
+    setOtherPlayer(undefined);
+    socket?.emit(LEAVE_GAME);
+  }
+
   function restart() {
     setResult(null);
     setGameId(null);
@@ -74,7 +83,15 @@ export default function GameProvider({ children }: PropsWithChildren) {
 
   return (
     <GameContext.Provider
-      value={{ joinGame, runMove, gameId, otherPlayer, result, restart }}
+      value={{
+        joinGame,
+        runMove,
+        gameId,
+        otherPlayer,
+        result,
+        restart,
+        leaveGame,
+      }}
     >
       {children}
     </GameContext.Provider>

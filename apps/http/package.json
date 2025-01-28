@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon",
-    "db:push": "prisma db push"
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio"
   },
   "keywords": [],
   "author": "",

@@ -46,6 +46,40 @@ body {
 }
 
 
+.button-before::before,
+.button-after::after {
+  --line-width: 40px;
+  height: 1px;
+  width: var(--line-width);
+  display: block;
+  content: '';
+  position: absolute;
+  transition: right 0.25s ease-in-out, left 0.25s ease-in-out;
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+  opacity: 0;
+}
+
+.button-before::before {
+  top: -1px;
+  right: 10px;
+}
+
+.button-after::after {
+  bottom: -1px;
+  left: 10px;
+}
+
+.button-before:hover::before {
+  right: calc(100% - var(--line-width) - 10px);
+  opacity: 1;
+}
+
+.button-after:hover::after {
+  left: calc(100% - var(--line-width) - 10px);
+  opacity: 1;
+}
+
+
 @keyframes result-animation {
   0% {
     scale: 0.4;
