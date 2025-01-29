@@ -37,7 +37,7 @@ export default function MoveButton({
   return (
     <button
       className={cn(
-        "flex items-center justify-center rounded-full bg-white transition-all duration-200 cursor-pointer size-[100px] md:size-[120px] border-[14px]  lg:border-[20px]",
+        "flex items-center justify-center rounded-full bg-white transition-all duration-200 cursor-pointer size-[100px] md:size-[140px] border-[14px]  lg:border-[20px]",
         staticClass,
         hoveredClass,
         className,
@@ -51,7 +51,7 @@ export default function MoveButton({
       <img
         src={MOVE_BUTTONS[value].img}
         alt=""
-        className="pointer-events-none w-8 md:w-10 shrink-0"
+        className="pointer-events-none w-8 md:w-12  shrink-0"
       />
     </button>
   );
