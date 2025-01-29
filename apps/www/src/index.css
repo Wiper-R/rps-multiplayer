@@ -8,7 +8,7 @@ body {
 
 
 body {
-  background-image: radial-gradient(circle at 50% 0%, rgb(31, 55, 86), rgb(20, 21, 57));
+  background-image: radial-gradient(circle at 50% 0%, #142438, #090a21);
   background-repeat: no-repeat;
   background-size: cover;
   background-attachment: fixed;

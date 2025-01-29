@@ -18,7 +18,17 @@ export function ResultScreen({ result }: { result: GameDef.GameResult }) {
         <MoveButton value={playerMove} />
         <MoveButton value={otherPlayerMove} />
       </div>
-      <Button onClick={() => game.restart()}>Play Again</Button>
+      <div className="text-3xl font-semibold text-center text-white">
+        {result.winnerId === null
+          ? "Draw"
+          : result.winnerId === userId
+            ? "You Win"
+            : "You Lose"}
+      </div>
+      <div className="flex flex-wrap gap-4">
+        <Button onClick={() => game.restart()}>Play Again</Button>
+        <Button onClick={() => game.leaveGame()}>Leave Game</Button>
+      </div>
     </div>
   );
 }

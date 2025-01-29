@@ -13,7 +13,7 @@ export default function useOtherPlayer(socket?: Socket) {
       if (player.id != session.data?.user.id) setOtherPlayer(player);
     });
 
-    socket.on(GAME_READY, (game: GameDef.GameReady) => {
+    socket.on(GAME_READY, ({ game }: GameDef.GameReady) => {
       game.players.forEach((p) => {
         if (p.id != session.data?.user.id) {
           setOtherPlayer(p);

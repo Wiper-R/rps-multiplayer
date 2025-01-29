@@ -15,6 +15,7 @@ export default class Game {
   private _id: string;
   private _players: Player[] = [];
   private _ready: boolean = false;
+  readonly moves: Record<string, GameDef.PlayerMove> = {};
 
   constructor(id: string) {
     this._id = id;
@@ -52,7 +53,6 @@ export default class Game {
     if (this.players.length >= MAX_PLAYERS) {
       throw new Error("Game is full");
     }
-    player.move = null;
     this._players.push(player);
     this.registerPlayerEvents(player);
     this.broadcast(PLAYER_JOINED, player.toJson() as GameDef.PlayerJoined);
@@ -60,7 +60,24 @@ export default class Game {
 
     if (this.players.length == MAX_PLAYERS) {
       this._ready = true;
-      this.broadcast(GAME_READY, this.toJson() as GameDef.GameReady);
+      const history: Record<string, number> = {};
+      await Promise.all(
+        this.players.map(async (p) => {
+          history[p.id] = await db.gameHistory.count({
+            where: {
+              playerIds: {
+                hasEvery: this.players.map((p) => p.id),
+              },
+              winnerId: p.id,
+            },
+          });
+        }),
+      );
+      this.broadcast(GAME_READY, {
+        game: this.toJson(),
+        history,
+      } as GameDef.GameReady);
+
       logger.info(`Game ${this.id} is ready`);
       await db.gameHistory.update({
         where: {
@@ -78,42 +95,42 @@ export default class Game {
   }
 
   async useMove(player: Player, move: GameDef.PlayerMove) {
-    if (this.players.length < MAX_PLAYERS || !this.ready || player.move) {
+    if (
+      this.players.length < MAX_PLAYERS ||
+      !this.ready ||
+      this.moves[player.id]
+    ) {
       return;
     }
-    const otherPlayer = this.players.find((p) => p.id != player.id);
-    if (!otherPlayer) {
-      return;
-    }
+    this.moves[player.id] = move;
 
-    player.move = move;
+    const opponent = this.players.find((p) => p.id != player.id);
+    if (!opponent) {
+      return;
+    }
+    const completed = Object.keys(this.moves).length == MAX_PLAYERS;
     logger.info(`Player ${player.id} used move ${move}`);
-    if (!otherPlayer.move) {
+
+    if (completed) {
+      const winnerId = this.calculateWinner();
       await db.gameHistory.update({
         where: { id: this.id },
         data: {
-          moves: {
-            [player.id]: move,
-          },
-        },
-      });
-    } else {
-      const moves = {
-        [player.id]: player.move,
-        [otherPlayer.id]: otherPlayer.move,
-      };
-      await db.gameHistory.update({
-        where: { id: this.id },
-        data: {
-          moves,
+          moves: this.moves,
           completedAt: new Date(),
+          winnerId,
         },
       });
       this.broadcast(GAME_RESULT, {
-        moves,
-        winnerId: this.calculateWinner(player, otherPlayer),
+        moves: this.moves,
+        winnerId,
       } as GameDef.GameResult);
       logger.info(`Game ${this.id} result sent`);
+    } else {
+      await db.gameHistory.update({
+        where: { id: this.id },
+        data: { moves: this.moves },
+      });
     }
   }
 
@@ -124,19 +141,23 @@ export default class Game {
     };
   }
 
-  calculateWinner(player1: Player, player2: Player): string | null {
-    if (player1.move == player2.move) {
+  calculateWinner(): string | null {
+    const [p1, p2] = this.players;
+    if (this.moves[p1.id] == this.moves[p2.id]) {
       return null;
     }
 
+    const p1Move = this.moves[p1.id];
+    const p2Move = this.moves[p2.id];
+
     if (
-      (player1.move == "rock" && player2.move == "scissors") ||
-      (player1.move == "scissors" && player2.move == "paper") ||
-      (player1.move == "paper" && player2.move == "rock")
+      (p1Move == "rock" && p2Move == "scissors") ||
+      (p1Move == "paper" && p2Move == "rock") ||
+      (p1Move == "scissors" && p2Move == "paper")
     ) {
-      return player1.id;
+      return p1.id;
     }
 
-    return player2.id;
+    return p2.id;
   }
 }

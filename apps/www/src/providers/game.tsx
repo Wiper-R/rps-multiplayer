@@ -25,6 +25,7 @@ type GameContext = {
   gameId: string | null;
   otherPlayer?: GameDef.Player;
   result: GameDef.GameResult | null;
+  history: { [k: string]: number };
   leaveGame: () => void;
 };
 
@@ -34,14 +35,14 @@ export default function GameProvider({ children }: PropsWithChildren) {
   const [socket, setSocket] = useState<Socket>();
   const [gameId, setGameId] = useState<string | null>(null);
   const [result, setResult] = useState<GameDef.GameResult | null>(null);
-  const [isReady, setIsReady] = useState(false);
+  const [history, setHistory] = useState<{ [k: string]: number }>({});
   const { otherPlayer, setOtherPlayer } = useOtherPlayer(socket);
   useEffect(() => {
     if (socket || !session.data?.user) return;
     const conn = io();
-    conn.on(GAME_READY, (game: GameDef.Game) => {
+    conn.on(GAME_READY, ({ game, history }: GameDef.GameReady) => {
       setGameId(game.id);
-      setIsReady(true);
+      setHistory(history);
     });
 
     conn.on(GAME_CREATED, (game: GameDef.GameCreated) => {
@@ -56,7 +57,7 @@ export default function GameProvider({ children }: PropsWithChildren) {
     return () => {
       conn.disconnect();
     };
-  }, [session, setGameId, setSocket]);
+  }, [session, setGameId, setSocket, setHistory]);
 
   function joinGame() {
     socket?.emit(JOIN_GAME);
@@ -68,7 +69,6 @@ export default function GameProvider({ children }: PropsWithChildren) {
   function leaveGame() {
     setGameId(null);
     setResult(null);
-    setIsReady(false);
     setOtherPlayer(undefined);
     socket?.emit(LEAVE_GAME);
   }
@@ -76,7 +76,6 @@ export default function GameProvider({ children }: PropsWithChildren) {
   function restart() {
     setResult(null);
     setGameId(null);
-    setIsReady(false);
     setOtherPlayer(undefined);
     socket?.emit(RESTART_GAME);
   }
@@ -90,6 +89,7 @@ export default function GameProvider({ children }: PropsWithChildren) {
         otherPlayer,
         result,
         restart,
+        history,
         leaveGame,
       }}
     >

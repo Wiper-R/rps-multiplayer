@@ -19,7 +19,7 @@ export declare namespace GameDef {
 
   // Events
   export type GameCreated = { id: string };
-  export type GameReady = Game;
+  export type GameReady = { game: Game; history: { [k: string]: number } };
   export type PlayerJoined = Player;
   export type PlayerLeft = Player;
   export type GameResult = {

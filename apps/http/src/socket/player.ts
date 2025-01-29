@@ -9,7 +9,6 @@ export default class Player {
   private _name: string;
   private _image: string | null;
   private _socket: Socket;
-  private _move: GameDef.PlayerMove | null = null;
   constructor({
     id,
     name,
@@ -42,14 +41,6 @@ export default class Player {
 
   get id(): string {
     return this._id;
-  }
-
-  get move(): GameDef.PlayerMove | null {
-    return this._move;
-  }
-
-  set move(move: GameDef.PlayerMove | null) {
-    this._move = move;
   }
 
   toJson(): GameDef.Player {
