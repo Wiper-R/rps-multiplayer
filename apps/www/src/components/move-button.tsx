@@ -37,24 +37,21 @@ export default function MoveButton({
   return (
     <button
       className={cn(
-        "flex items-center justify-center rounded-full bg-white transition-all duration-200 cursor-pointer",
+        "flex items-center justify-center rounded-full bg-white transition-all duration-200 cursor-pointer size-[100px] md:size-[120px] border-[14px]  lg:border-[20px]",
         staticClass,
         hoveredClass,
         className,
       )}
       onClick={handleClick}
       style={{
-        borderWidth: "20px",
         borderStyle: "solid",
         borderColor: MOVE_BUTTONS[value].color,
-        width: 160,
-        height: 160,
       }}
     >
       <img
         src={MOVE_BUTTONS[value].img}
         alt=""
-        className="pointer-events-none"
+        className="pointer-events-none w-8 md:w-10 shrink-0"
       />
     </button>
   );

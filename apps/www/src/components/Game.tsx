@@ -4,7 +4,7 @@ import { ResultScreen } from "./result-screen";
 import Button from "./button";
 import Avatar from "./avatar";
 import { authClient } from "@/lib/auth-client";
-import MainMenu from "./main-main";
+import MainMenu from "./main-menu";
 
 export default function Game() {
   const { gameId, result, leaveGame, otherPlayer, history } = useGame();
@@ -47,7 +47,7 @@ export default function Game() {
         <MainMenu />
       ) : (
         !result && (
-          <div className="p-10 flex flex-row-reverse">
+          <div className="p-10 flex flex-row-reverse absolute bottom-0 right-0">
             <Button onClick={leaveGame}>Leave Game</Button>
           </div>
         )
