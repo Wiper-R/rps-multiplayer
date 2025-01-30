@@ -6,6 +6,12 @@
     "@repo/types#build": {
       "dependsOn": ["@repo/constants#build"]
     },
+    "www#build": {
+      "dependsOn": ["@repo/types#build"]
+    },
+    "http#build": {
+      "dependsOn": ["@repo/types#build"]
+    },
     "build": {
       "cache": false,
       "persistent": false

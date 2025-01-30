@@ -5,7 +5,7 @@ FROM base AS builder
 RUN apk update
 WORKDIR /app
 COPY . .
-RUN turbo prune http --docker
+RUN turbo prune http www --docker
 
 FROM base AS installer
 RUN apk update
@@ -22,8 +22,10 @@ FROM base AS runner
 WORKDIR /app
 
 COPY --from=installer /app ./
+COPY --from=installer /app/apps/www/dist ./apps/http/public
 # COPY --from=installer /app/node_modules ./node_modules/
 # COPY --from=installer /app/apps/http/dist ./apps/http/dist
 # COPY --from=installer /app/apps/http/node_modules ./apps/http/node_modules
 
-CMD node apps/http/dist/index.js
+WORKDIR /app/apps/http/
+CMD ["npm", "run", "start"]

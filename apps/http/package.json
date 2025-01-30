@@ -9,7 +9,8 @@
     "db:studio": "prisma studio",
     "db:generate": "prisma generate",
     "db:reset": "prisma db push --force-reset",
-    "build": "tsup src/index.ts"
+    "build": "tsup src/index.ts",
+    "start": "prisma db push && node dist/index.js"
   },
   "dependencies": {
     "@prisma/client": "6.2.1",
