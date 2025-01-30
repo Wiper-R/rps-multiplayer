@@ -1,7 +1,12 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  "globalDependencies": [".env"],
   "tasks": {
+    "build": {
+      "cache": false,
+      "persistent": false
+    },
     "dev": {
       "cache": false,
       "persistent": true
@@ -10,6 +15,11 @@
       "cache": false,
       "persistent": true,
       "dependsOn": ["^db:push"]
+    },
+    "db:generate": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^db:generate"]
     },
     "db:studio": {
       "cache": false,

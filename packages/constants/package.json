@@ -1,19 +1,26 @@
 {
   "name": "@repo/constants",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "dev": "tsc -w"
   },
   "exports": {
-    "./events": "./src/events.ts",
-    "./game": "./src/game.ts"
+    "./game": {
+      "default": "./dist/game.js",
+      "types": "./dist/game.d.ts"
+    },
+    "./events": {
+      "default": "./dist/events.js",
+      "types": "./dist/events.d.ts"
+    }
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "files": [
+    "dist/**"
+  ],
   "devDependencies": {
     "typescript": "^5.7.3"
-  }
+  },
+  "type": "module"
 }

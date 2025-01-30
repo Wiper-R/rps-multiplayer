@@ -1,18 +1,32 @@
 {
   "name": "@repo/types",
-  "version": "1.0.0",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/**"
+  ],
   "exports": {
-    "./zod": "./src/zod/index.ts",
-    "./game": "./src/game/index.ts"
+    "./zod": {
+      "default": "./dist/zod/index.js",
+      "types": "./dist/zod/index.d.ts"
+    },
+    "./game": {
+      "default": "./dist/game/index.js",
+      "types": "./dist/game/index.d.ts"
+    }
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "dev": "tsc -w"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "zod": "^3.24.1",
-    "@repo/constants": "workspace:*"
+    "@repo/constants": "workspace:*",
+    "zod": "^3.24.1"
+  },
+  "type": "module",
+  "devDependencies": {
+    "tsup": "^8.3.6"
   }
 }
