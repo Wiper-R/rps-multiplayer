@@ -23,9 +23,6 @@ WORKDIR /app
 
 COPY --from=installer /app ./
 COPY --from=installer /app/apps/www/dist ./apps/http/public
-# COPY --from=installer /app/node_modules ./node_modules/
-# COPY --from=installer /app/apps/http/dist ./apps/http/dist
-# COPY --from=installer /app/apps/http/node_modules ./apps/http/node_modules
 
 WORKDIR /app/apps/http/
 CMD ["npm", "run", "start"]

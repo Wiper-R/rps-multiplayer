@@ -13,7 +13,7 @@ app.use(express.static("public"));
 if (process.env.NODE_ENV == "development") {
   app.use(
     cors({
-      origin: ["http://192.168.1.15:5173", "http://localhost:5173"],
+      origin: ["http://localhost:5173"],
       credentials: true,
     }),
   );
