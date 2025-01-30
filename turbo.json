@@ -3,6 +3,9 @@
   "ui": "tui",
   "globalDependencies": [".env"],
   "tasks": {
+    "@repo/types#build": {
+      "dependsOn": ["@repo/constants#build"]
+    },
     "build": {
       "cache": false,
       "persistent": false

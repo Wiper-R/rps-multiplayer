@@ -21,9 +21,9 @@ RUN pnpm exec turbo run build
 FROM base AS runner
 WORKDIR /app
 
-COPY --from=installer /app/packages ./packages
-COPY --from=installer /app/node_modules ./node_modules/
-COPY --from=installer /app/apps/http/dist ./apps/http/dist
-COPY --from=installer /app/apps/http/node_modules ./apps/http/node_modules
+COPY --from=installer /app ./
+# COPY --from=installer /app/node_modules ./node_modules/
+# COPY --from=installer /app/apps/http/dist ./apps/http/dist
+# COPY --from=installer /app/apps/http/node_modules ./apps/http/node_modules
 
 CMD node apps/http/dist/index.js

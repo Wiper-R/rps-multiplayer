@@ -9,12 +9,15 @@ import Player from "./socket/player";
 import cors from "cors";
 
 const app = express();
-app.use(
-  cors({
-    origin: ["http://192.168.1.15:5173", "http://localhost:5173"],
-    credentials: true,
-  }),
-);
+app.use(express.static("public"));
+if (process.env.NODE_ENV == "development") {
+  app.use(
+    cors({
+      origin: ["http://192.168.1.15:5173", "http://localhost:5173"],
+      credentials: true,
+    }),
+  );
+}
 app.all("/api/v1/auth/*", toNodeHandler(auth));
 app.use(express.json());
 
