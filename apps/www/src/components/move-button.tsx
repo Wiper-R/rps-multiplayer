@@ -28,31 +28,38 @@ export default function MoveButton({
   className?: string;
 }) {
   const { runMove } = useGame();
-  const staticClass = "shadow-[0_4px_2px_0_rgba(0,0,0,0.2)_inset]";
+  const shadowInner = "shadow-[0_4px_2px_0_rgba(0,0,0,0.2)_inset]";
+  const shadowOuter = "shadow-[0_-4px_2px_0_rgba(0,0,0,0.5)_inset]";
   const hoveredClass =
-    "hover:shadow-[0_4px_2px_0_rgba(0,0,0,0.2)_inset,0_0_0_10px_rgba(255,255,255,0.2),0_0_0_30px_rgba(255,255,255,0.2)]";
+    "hover:shadow-[0_0_0_10px_rgba(255,255,255,0.2),0_0_0_30px_rgba(255,255,255,0.2),0_-4px_2px_0_rgba(0,0,0,0.3)_inset]";
   function handleClick() {
     runMove(value);
   }
   return (
     <button
       className={cn(
-        "flex items-center justify-center rounded-full bg-white transition-all duration-200 cursor-pointer size-[100px] md:size-[140px] border-[14px]  lg:border-[20px]",
-        staticClass,
+        "rounded-full p-4.5 size-[140px] shrink-0 transition-all duration-200 cursor-pointer",
         hoveredClass,
         className,
+        shadowOuter,
       )}
-      onClick={handleClick}
       style={{
-        borderStyle: "solid",
-        borderColor: MOVE_BUTTONS[value].color,
+        backgroundColor: MOVE_BUTTONS[value].color,
       }}
+      onClick={handleClick}
     >
-      <img
-        src={MOVE_BUTTONS[value].img}
-        alt=""
-        className="pointer-events-none w-8 md:w-12  shrink-0"
-      />
+      <div
+        className={cn(
+          "p-4 bg-white rounded-full h-full w-full flex items-center justify-center",
+          shadowInner,
+        )}
+      >
+        <img
+          src={MOVE_BUTTONS[value].img}
+          alt=""
+          className="pointer-events-none w-8 md:w-12  shrink-0"
+        />
+      </div>
     </button>
   );
 }
