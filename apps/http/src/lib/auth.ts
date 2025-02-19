@@ -11,7 +11,7 @@ export const auth = betterAuth({
     "http://localhost:5173",
     "http://192.168.1.15:5173",
     "http://localhost:5000",
-    "http://rps.seekhcode.me",
+    "https://rps.seekhcode.me",
   ],
   socialProviders: {
     google: {
