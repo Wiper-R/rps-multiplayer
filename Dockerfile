@@ -12,6 +12,7 @@ RUN apk update
 WORKDIR /app
 
 COPY --from=builder /app/out/json/ . 
+RUN corepack use pnpm@9.14.4
 RUN corepack enable
 RUN pnpm install --frozen-lockfile
 COPY --from=builder /app/out/full/ .
