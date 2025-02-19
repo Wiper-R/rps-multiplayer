@@ -12,8 +12,8 @@ RUN apk update
 WORKDIR /app
 
 COPY --from=builder /app/out/json/ . 
-RUN corepack use pnpm@9.14.4
 RUN corepack enable
+RUN corepack prepare pnpm@10.0.0 --activate
 RUN pnpm install --frozen-lockfile
 COPY --from=builder /app/out/full/ .
 RUN pnpm exec turbo db:generate
